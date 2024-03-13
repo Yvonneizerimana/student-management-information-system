@@ -6,25 +6,26 @@ import mongoose from 'mongoose';
 import studentModel from './models/student.model.js';
 
 
-const app=express();
+const app = express();
 
 app.use(express.json());
 
+//add student
 
-app.post('/student/add',async(req,res)=>{
-try{
-    const addedStudent=await studentModel.create(req.body);
-    res.status(201).json({
-        message:"Student added successfuly",
-        student:addedStudent
-    })
-}
-catch(error){
-    console.log(error.message);
-res.status(500).json({
-    message:"internal server error"
-} );
-}
+app.post('/student/add', async (req, res) => {
+    try {
+        const addedStudent = await studentModel.create(req.body);
+        res.status(201).json({
+            message: "Student added successfuly",
+            student: addedStudent
+        })
+    }
+    catch (error) {
+        console.log(error.message);
+        res.status(500).json({
+            message: "internal server error"
+        });
+    }
 });
 
 
@@ -46,71 +47,112 @@ res.status(500).json({
 // });
 
 
-app.get('/student/getAll',async(req,res)=>{
-    try{
-        const allList=await studentModel.find();
+
+//get all
+
+app.get('/student/getAll', async (req, res) => {
+    try {
+        const allList = await studentModel.find();
         res.status(201).json({
-            message:"all List of students",
-            student:allList
+            message: "all List of students",
+            student: allList
         })
     }
-    catch(error){
+    catch (error) {
         console.log(error.message);
-    res.status(500).json({
-        message:"internal server error"
-    } );
+        res.status(500).json({
+            message: "internal server error"
+        });
     }
+});
+
+//get by id
+
+
+app.get('/student/getById/:id', async (req, res) => {
+    try {
+        const listById = await studentModel.findById(req.params.id);
+        res.status(201).json({
+            message: "find student ok",
+            student: listById
+        })
+    }
+    catch (error) {
+        console.log(error.message);
+        res.status(500).json({
+            message: "internal server error"
+        });
+    }
+});
+
+
+//delete by id
+
+app.delete('/student/delete/:id', async (req, res) => {
+    try {
+
+        const deleteById = await studentModel.deleteOne({ _id: req.params.id });
+        if (deleteById) {
+            res.status(201).json({
+                message: "student deleted successfuly"
+
+            });
+        }
+    }
+    catch (error) {
+        console.log(error.message);
+        res.status(500).json({
+            message: "internal server error"
+        });
+    }
+});
+
+
+//update
+
+
+app.put('/student/update', async (req, res) => {
+    try {
+        const updateList = await findOneAndUpdate({
+            fullName: req.body.fullName,
+            email: req.body.email,
+            phoneNumber: req.body.phoneNumber,
+            nationalId: req.body.nationalId,
+            gender: req.body.gender,
+            updatedAt: Date.now()
+        }).where(req.params.id);
+        res.status(201).json({
+            message: "user updated successfuly",
+            student: updateList
+        })
+    }
+    catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            message: "internal server error"
+        })
+    }
+
+})
+
+
+//database connection
+
+mongoose.connect(process.env.MONGODB_URL)
+    .then(() => {
+        console.log('conntected to database');
+    })
+    .catch((error) => {
+        console.error('failed to connect to database', error);
     });
 
 
-    app.get('/student/getById/:id',async(req,res)=>{
-        try{
-            const listById=await studentModel.findById(req.params.id);
-            res.status(201).json({
-                message:"find student ok",
-                student:listById
-            })
-        }
-        catch(error){
-            console.log(error.message);
-        res.status(500).json({
-            message:"internal server error"
-        } );
-        }
-        });
-
-
-        app.put('/student/delete/:id',async(req,res)=>{
-            try{
-                const listById=await studentModel.findById(req.params.id);
-                if(listById){
-                    
-                }
-                res.status(201).json({
-                    message:"student deleted successfuly"
-                
-                })
-            }
-            catch(error){
-                console.log(error.message);
-            res.status(500).json({
-                message:"internal server error"
-            } );
-            }
-            });      
+    //assign server to the port
     
+const PORT = process.env.PORT || 3000
 
-mongoose.connect(process.env.MONGODB_URL)
-.then(()=>{
-console.log('conntected to database');
-})
-.catch((error)=>{
-console.error('failed to connect to database',error);
-});
-
-const PORT=process.env.PORT || 3000
-
-app.listen(PORT,()=>{
+app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
 });
 
+1
