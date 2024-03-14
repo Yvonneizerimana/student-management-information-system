@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import studentModel from './models/student.model.js';
 
 
+
 const app = express();
 
 app.use(express.json());
@@ -111,18 +112,17 @@ app.delete('/student/delete/:id', async (req, res) => {
 //update
 
 
-app.put('/student/update', async (req, res) => {
+app.put('/student/update/:id', async (req, res) => {
     try {
-        const updateList = await findOneAndUpdate({
+        const updateList = await studentModel.findOneAndUpdate({_id:req.params.id},{
             fullName: req.body.fullName,
             email: req.body.email,
             phoneNumber: req.body.phoneNumber,
             nationalId: req.body.nationalId,
-            gender: req.body.gender,
-            updatedAt: Date.now()
-        }).where(req.params.id);
+            gender: req.body.gender
+            
+        },{new:true});
         res.status(201).json({
-            message: "user updated successfuly",
             student: updateList
         })
     }
@@ -133,8 +133,32 @@ app.put('/student/update', async (req, res) => {
         })
     }
 
-})
+});
 
+
+//get by email
+
+app.get('/student/getByEmail/:email', async (req, res) => {
+    try {
+        const findByEmail = await studentModel.findOne({email:req.params.email});
+
+        if(!findByEmail){
+            res.status(404).json({
+                message:'student not found'
+            })
+        }
+        res.status(201).json({
+            message: "find student by email is ok",
+            student: findByEmail
+        })
+    }
+    catch (error) {
+        console.log(error.message);
+        res.status(500).json({
+            message: "internal server error"
+        });
+    }
+});
 
 //database connection
 
